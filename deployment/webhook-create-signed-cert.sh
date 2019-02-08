@@ -4,10 +4,10 @@ set -e
 
 usage() {
     cat <<EOF
-Generate certificate suitable for use with an sidecar-injector webhook service.
+Generate certificate suitable for use with an gpu-mutating webhook service.
 
 This script uses k8s' CertificateSigningRequest API to a generate a
-certificate signed by k8s CA suitable for use with sidecar-injector webhook
+certificate signed by k8s CA suitable for use with gpu-mutating webhook
 services. This requires permissions to create and approve CSR. See
 https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster for
 detailed explantion and additional instructions.
@@ -46,9 +46,9 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && service=sidecar-injector-webhook-svc
-[ -z ${secret} ] && secret=sidecar-injector-webhook-certs
-[ -z ${namespace} ] && namespace=default
+[ -z ${service} ] && gpu-mutating-webhook-svc
+[ -z ${secret} ] && gpu-mutating-webhook-certs
+[ -z ${namespace} ] && namespace=gpu-mutating
 
 if [ ! -x "$(command -v openssl)" ]; then
     echo "openssl not found"
