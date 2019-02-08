@@ -46,8 +46,8 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-[ -z ${service} ] && gpu-mutating-webhook-svc
-[ -z ${secret} ] && gpu-mutating-webhook-certs
+[ -z ${service} ] && service=gpu-mutating-webhook-svc
+[ -z ${secret} ] && secret=gpu-mutating-webhook-certs
 [ -z ${namespace} ] && namespace=gpu-mutating
 
 if [ ! -x "$(command -v openssl)" ]; then
