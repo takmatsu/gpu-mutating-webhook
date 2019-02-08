@@ -1,0 +1,19 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: gpu-mutating-webhook-cfg
+  labels:
+    app: gpu-mutating
+webhooks:
+  - name: gpu-mutating-webhook.takmatsu.github.com
+    clientConfig:
+      service:
+        name: gpu-mutating-webhook-svc
+        namespace: gpu-mutating
+        path: "/mutate"
+      caBundle: ${CA_BUNDLE}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
