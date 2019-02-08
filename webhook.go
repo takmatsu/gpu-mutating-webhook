@@ -113,21 +113,36 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 }
 
 func updateNvidiaEnv(target []corev1.Container, basePath string) (patch []patchOperation){
-	inject_env := []map[string]string{{"name": "NVIDIA_VISIBLE_DEVICES", "value": "none"}}
+	inject_env := map[string]string{"name": "NVIDIA_VISIBLE_DEVICES", "value": "none"}
 	for i, c := range target {
 		requests, ok := c.Resources.Requests["nvidia.com/gpu"]
-		for _, v := range c.Env {
-			if v.Name != "NVIDIA_VISIBLE_DEVICES" {
-				env := map[string]string{"name": v.Name, "value": v.Value}
-				inject_env = append(inject_env, env)
+		gpu_i := -1
+		for j, v := range c.Env {
+			if v.Name == "NVIDIA_VISIBLE_DEVICES" {
+				gpu_i = j
+				break
 			}
 		}
 		if !ok || (ok && requests.IsZero()) {
+			op := "replace"
+			if gpu_i == -1 {
+				op = "add"
+				gpu_i = len(c.Env)
+			}
+			path := basePath + "/" + strconv.Itoa(i) + "/env/" + strconv.Itoa(gpu_i)
+
+			var value interface{}
+			if len(c.Env) == 0 {
+				value = []map[string]string{inject_env}
+				path = basePath + "/" + strconv.Itoa(i) + "/env"
+			} else {
+				value = inject_env
+			}
 			patch = append(patch, patchOperation {
-				Op:   "add",
-				Path: basePath + "/" + strconv.Itoa(i) + "/env",
-				Value: inject_env,
-                        	})
+				Op:   op,
+				Path: path,
+				Value: value,
+                        })
 		}
 	}
 	return patch
