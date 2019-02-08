@@ -124,7 +124,7 @@ func updateNvidiaEnv(target []corev1.Container, basePath string) (patch []patchO
 		}
 		if !ok || (ok && requests.IsZero()) {
 			patch = append(patch, patchOperation {
-				Op:   "replace",
+				Op:   "add",
 				Path: basePath + "/" + strconv.Itoa(i) + "/env",
 				Value: inject_env,
                         	})
