@@ -24,7 +24,6 @@ In addition, the `MutatingAdmissionWebhook` and `ValidatingAdmissionWebhook` adm
 go get -u github.com/golang/dep/cmd/dep
 ```
 
-2. Build and push docker image
    
 ```
 ./build
@@ -32,7 +31,12 @@ go get -u github.com/golang/dep/cmd/dep
 
 ## Deploy
 
-1. Create a signed cert/key pair and store it in a Kubernetes `secret` that will be consumed by sidecar deployment
+1. Create namespace
+```
+kubectl apply -f deployment/namespace.yaml
+```
+
+2. Create a signed cert/key pair and store it in a Kubernetes `secret` that will be consumed by sidecar deployment
 ```
 ./deployment/webhook-create-signed-cert.sh \
     --service gpu-mutating-webhook-svc \
@@ -40,16 +44,15 @@ go get -u github.com/golang/dep/cmd/dep
     --namespace gpu-mutating
 ```
 
-2. Patch the `MutatingWebhookConfiguration` by set `caBundle` with correct value from Kubernetes cluster
+3. Patch the `MutatingWebhookConfiguration` by set `caBundle` with correct value from Kubernetes cluster
 ```
 cat deployment/mutatingwebhook.yaml | \
     deployment/webhook-patch-ca-bundle.sh > \
     deployment/mutatingwebhook-ca-bundle.yaml
 ```
 
-3. Deploy resources
+4. Deploy resources
 ```
-kubectl apply -f deployment/namespace.yaml
 kubectl apply -f deployment/deployment.yaml
 kubectl apply -f deployment/service.yaml
 kubectl apply -f deployment/mutatingwebhook-ca-bundle.yaml
