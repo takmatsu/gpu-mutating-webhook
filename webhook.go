@@ -175,8 +175,15 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 		req.Kind, req.Namespace, req.Name, pod.Name, req.UID, req.Operation, req.UserInfo)
 	
 	// determine whether to perform mutation
-	if !mutationRequired(ignoredNamespaces, &pod.ObjectMeta) {
-		glog.Infof("Skipping mutation for %s/%s due to policy check", pod.Namespace, pod.Name)
+	objectmeta := pod.ObjectMeta
+	if objectmeta.Namespace == "" {
+		objectmeta.Namespace = req.Namespace
+	}
+	if objectmeta.Name == "" {
+		objectmeta.Name = objectmeta.GenerateName
+	}
+	if !mutationRequired(ignoredNamespaces, &objectmeta) {
+		glog.Infof("Skipping mutation for %s/%s due to policy check", objectmeta.Namespace, objectmeta.Name)
 		return &v1beta1.AdmissionResponse {
 			Allowed: true, 
 		}
