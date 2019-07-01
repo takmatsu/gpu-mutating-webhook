@@ -91,20 +91,21 @@ func mutationRequired(ignoredList []string, metadata *metav1.ObjectMeta) bool {
 }
 
 func updateAnnotation(target map[string]string, added map[string]string) (patch []patchOperation) {
+	if target == nil {
+		target = map[string]string{}
+	}
 	for key, value := range added {
-		if target == nil || target[key] == "" {
-			target = map[string]string{}
+		keyEscaped := strings.Replace(key, "/", "~1", -1)
+		if target[key] == "" {
 			patch = append(patch, patchOperation {
 				Op:   "add",
-				Path: "/metadata/annotations",
-				Value: map[string]string{
-					key: value,
-				},
+				Path: "/metadata/annotations/" + keyEscaped,
+				Value: value,
 			})
 		} else {
 			patch = append(patch, patchOperation {
 				Op:    "replace",
-				Path:  "/metadata/annotations/" + key,
+				Path:  "/metadata/annotations/" + keyEscaped,
 				Value: value,
 			})
 		}
